@@ -10,25 +10,29 @@ const svg = container
   .style("width", "100%")
   .style("height", "100%");
 
-// Define color scale
+// ✅ Updated color scale to match your real dataset (4.3 → 71.6)
 const color = d3.scaleSequential()
   .interpolator(d3.interpolateReds)
-  .domain([20, 55]); // overdose rate range
+  .domain([5, 72]);
 
-// Projection and path adjusted for aspect ratio
+// Projection & path
 const projection = d3.geoAlbersUsa()
   .translate([width / 2, height / 2])
-  .scale(width * 0.7); // dynamic scale — fills section properly
+  .scale(width * 0.7);
 
 const path = d3.geoPath().projection(projection);
 
-
-// Load data and map
+// Load map + overdose data
 Promise.all([
   d3.json("https://cdn.jsdelivr.net/npm/us-atlas@3/states-10m.json"),
   d3.csv("data/overdose_rates_us.csv")
 ]).then(([us, data]) => {
-  const rateByState = new Map(data.map(d => [d.state, +d.rate]));
+
+  // Convert rates to numbers
+  const rateByState = new Map(
+    data.map(d => [d.state.trim().replace(/"/g, ''), +d.rate])
+);
+  
 
   const states = topojson.feature(us, us.objects.states).features;
 
@@ -41,39 +45,19 @@ Promise.all([
     .attr("fill", d => {
       const name = getStateName(d.id);
       const rate = rateByState.get(name);
-      return rate ? color(rate) : "#ccc";
+      return rate ? color(rate) : "#444";
     })
     .attr("stroke", "#fff")
-    .attr("stroke-width", 0.5)
+    .attr("stroke-width", 0.6)
     .append("title")
     .text(d => {
       const name = getStateName(d.id);
       const rate = rateByState.get(name);
-      return `${name}: ${rate ? rate.toFixed(1) : "No data"} deaths / 100k`;
+      return `${name}: ${rate ? rate.toFixed(1) : "No data"} deaths / 100k (2023)`;
     });
-
-  // // Fade-in "lives stolen" icons
-  // const points = d3.range(100).map(() => ({
-  //   x: Math.random() * width,
-  //   y: Math.random() * height
-  // }));
-
-  svg.selectAll(".person")
-    .data(points)
-    .enter()
-    .append("circle")
-    .attr("class", "person")
-    .attr("r", 0)
-    .attr("cx", d => d.x)
-    .attr("cy", d => d.y)
-    .style("fill", "rgba(255, 80, 80, 0.7)")
-    .transition()
-    .delay((_, i) => i * 40)
-    .duration(700)
-    .attr("r", 3);
 });
 
-// Helper: convert state FIPS to name
+// Convert FIPS → State Name
 function getStateName(fips) {
   const states = {
     1: "Alabama", 2: "Alaska", 4: "Arizona", 5: "Arkansas", 6: "California",
@@ -91,21 +75,15 @@ function getStateName(fips) {
   return states[fips];
 }
 
-
-//--------------------------------------------
-// Add a vertical color legend for overdose rates
-//--------------------------------------------
-
-// Legend dimensions
+// ✅ Updated Legend to match new domain
 const legendWidth = 20;
 const legendHeight = 200;
 const legendMargin = { top: 20, right: 50 };
 
 const legendSvg = svg.append("g")
   .attr("class", "legend")
-  .attr("transform", `translate(${width - legendMargin.right-150}, ${height / 2 - legendHeight / 2})`);
+  .attr("transform", `translate(${width - legendMargin.right - 150}, ${height / 2 - legendHeight / 2})`);
 
-// Create gradient definition
 const defs = svg.append("defs");
 
 const gradient = defs.append("linearGradient")
@@ -120,9 +98,8 @@ gradient.selectAll("stop")
   .enter()
   .append("stop")
   .attr("offset", d => `${d * 100}%`)
-  .attr("stop-color", d => color(20 + d * (55 - 20)));
+  .attr("stop-color", d => color(5 + d * (72 - 5)));
 
-// Draw legend color bar
 legendSvg.append("rect")
   .attr("width", legendWidth)
   .attr("height", legendHeight)
@@ -130,14 +107,12 @@ legendSvg.append("rect")
   .style("stroke", "#ccc")
   .style("stroke-width", 0.5);
 
-// Add legend scale
 const legendScale = d3.scaleLinear()
-  .domain([20, 55]) // same as color domain
+  .domain([5, 72])
   .range([legendHeight, 0]);
 
 const legendAxis = d3.axisRight(legendScale)
-  .tickValues([20, 30, 40, 50])
-  .tickFormat(d => `${d}`)
+  .tickValues([5, 20, 40, 60, 72])
   .tickSize(3);
 
 legendSvg.append("g")
@@ -148,11 +123,10 @@ legendSvg.append("g")
   .style("fill", "#eee")
   .style("font-size", "12px");
 
-// Add title label
 legendSvg.append("text")
   .attr("x", -40)
   .attr("y", -10)
   .attr("fill", "#fff")
   .style("font-size", "13px")
   .style("font-weight", "600")
-  .text("Deaths per 100k");
+  .text("Deaths per 100k (2023)");

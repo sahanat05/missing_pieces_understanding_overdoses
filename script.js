@@ -31,3 +31,64 @@ document.addEventListener('keydown', e => {
     window.scrollBy({ top: -scrollAmount, behavior: 'smooth' });
   }
 });
+
+
+// Jonathan's Story Controls
+const jonAudio = document.getElementById("jonathans-audio");
+const jonBtn = document.getElementById("play-audio-btn");
+
+jonBtn.addEventListener("click", () => {
+  if (jonAudio.paused) {
+    jonAudio.play();
+    jonBtn.textContent = "⏸ Pause Story";
+  } else {
+    jonAudio.pause();
+    jonBtn.textContent = "▶ Play Story";
+  }
+});
+
+// Sofia's Story Controls
+const sofiaAudio = document.getElementById("sofias-audio");
+const sofiaBtn = document.getElementById("play-audio-btn-sofia");
+
+sofiaBtn.addEventListener("click", () => {
+  if (sofiaAudio.paused) {
+    sofiaAudio.play();
+    sofiaBtn.textContent = "⏸ Pause Story";
+  } else {
+    sofiaAudio.pause();
+    sofiaBtn.textContent = "▶ Play Story";
+  }
+});
+
+// ✅ Automatically play Sofia after Jonathan finishes
+jonAudio.addEventListener("ended", () => {
+  // Start Sofia’s story
+  sofiaAudio.play();
+  sofiaBtn.textContent = "⏸ Pause Story";
+
+  // Scroll smoothly to Sofia’s story section (optional but nice)
+  document.getElementById("sofias-story").scrollIntoView({ behavior: "smooth" });
+});
+
+
+// Jake's Story Controls
+const jakeAudio = document.getElementById("jakes-audio");
+const jakeBtn = document.getElementById("play-audio-btn-jake");
+
+jakeBtn.addEventListener("click", () => {
+  if (jakeAudio.paused) {
+    jakeAudio.play();
+    jakeBtn.textContent = "⏸ Pause Story";
+  } else {
+    jakeAudio.pause();
+    jakeBtn.textContent = "▶ Play Story";
+  }
+});
+
+// ✅ Automatically play Jake after Sofia
+sofiaAudio.addEventListener("ended", () => {
+  jakeAudio.play();
+  jakeBtn.textContent = "⏸ Pause Story";
+  document.getElementById("jakes-story").scrollIntoView({ behavior: "smooth" });
+});
