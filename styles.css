@@ -165,6 +165,7 @@
     ry: 3;
   }
   
+  
 
   .overdose-filter-btn:hover {
   transform: translateY(-2px);
@@ -401,5 +402,83 @@
   
   .hero-button-outline:hover {
     background: rgba(255,255,255,0.15);
+  }
+  
+
+/* ======================================
+   NALOXONE QUIZ — UPDATED INTERACTIVE UI
+   ====================================== */
+
+   #naloxone-quiz-section .content h1 {
+    font-size: 3rem;
+    text-align: center;
+    margin-bottom: 10px;
+  }
+  
+  #naloxone-quiz-section .content p {
+    text-align: center;
+    font-size: 1.3rem;
+    opacity: 0.9;
+  }
+  
+  /* Container for all three pies */
+  #quiz-container {
+    display: flex;
+    justify-content: center;
+    gap: 50px;
+    margin-top: 40px;
+    flex-wrap: wrap;
+  }
+  
+  /* Individual chart card */
+  .quiz-pie {
+    width: 240px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    color: #f5f5f5;
+    gap: 10px;
+  }
+  
+  .quiz-pie h3 {
+    font-size: 1.2rem;
+    margin-bottom: 5px;
+  }
+  
+  /* SVG ring */
+  .quiz-pie svg {
+    width: 180px;
+    height: 180px;
+    cursor: crosshair;
+  }
+  
+  /* Guess label */
+  .quiz-pie p {
+    font-size: 1.1rem;
+    margin-top: 5px;
+  }
+  
+  /* Results */
+  .quiz-pie .result {
+    font-size: 1.3rem;
+    margin-top: 8px;
+    font-weight: 600;
+  }
+  
+  /* Submit button styling */
+  #submit-quiz {
+    margin-top: 20px;
+    padding: 12px 26px;
+    font-size: 1.2rem;
+    background: white;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: 0.3s ease;
+  }
+  
+  #submit-quiz:hover {
+    background: #e0e0e0;
   }
   

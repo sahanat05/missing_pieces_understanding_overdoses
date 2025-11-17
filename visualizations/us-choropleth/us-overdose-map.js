@@ -160,8 +160,6 @@ legendSvg.append("rect")
   .attr("width", legendWidth)
   .attr("height", legendHeight)
   .style("fill", "url(#legend-gradient)")
-  .style("stroke", "#ccc")
-  .style("stroke-width", 0.5);
 
 const legendScale = d3.scaleLinear()
   .domain([5, 72])
