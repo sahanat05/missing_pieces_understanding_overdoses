@@ -861,3 +861,78 @@
 .play-btn:hover {
   background: white;
 }
+
+/* Solutions in Focus Layout */
+.solutions-container {
+  display: flex;
+  gap: 2rem;
+  width: 90%;
+  max-width: 1400px;
+  margin-top: 2rem;
+}
+
+.solutions-container .plot-container {
+  flex: 2;
+  min-width: 0;
+}
+
+.solutions-text-box {
+  flex: 1;
+  background: rgba(255, 255, 255, 0.05);
+  border-radius: 10px;
+  padding: 2rem;
+  color: white;
+}
+
+.solutions-text-box h3 {
+  font-size: 1.8rem;
+  margin-bottom: 1rem;
+  color: #fff;
+}
+
+.solutions-text-box p {
+  font-size: 1.2rem;
+  line-height: 1.7;
+  opacity: 0.9;
+}
+
+.solutions-text-box .location {
+  color: #9a9a9a;
+  font-size: 1rem;
+  margin-bottom: 0.5rem;
+}
+
+.solutions-text-box .metric {
+  color: #e63946;
+  font-weight: 700;
+  font-size: 1.3rem;
+  margin-bottom: 1rem;
+}
+
+.solutions-text-box .description {
+  margin-bottom: 1rem;
+}
+
+.solutions-text-box .impact-title {
+  font-weight: 600;
+  color: #fff;
+  margin-top: 1rem;
+  margin-bottom: 0.5rem;
+}
+
+.solutions-text-box .impact {
+  font-size: 1.1rem;
+  line-height: 1.6;
+}
+
+@media (max-width: 900px) {
+  .solutions-container {
+    flex-direction: column;
+  }
+  
+  .solutions-container .plot-container,
+  .solutions-text-box {
+    flex: none;
+    width: 100%;
+  }
+}
