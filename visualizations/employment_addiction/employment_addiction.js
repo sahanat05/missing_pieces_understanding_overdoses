@@ -4,10 +4,10 @@
 const style = document.createElement("style");
 style.textContent = `
   .icon-chart-container {
-    max-width: 100%;
+    max-width: 90%;
     margin: 0 auto;
     background: transparent;
-    padding: 24px;
+    padding: 12px;
     font-family: system-ui, sans-serif;
     color: #f5f5f7;
     overflow: visible;
@@ -18,7 +18,7 @@ style.textContent = `
   }
 
   .icon-chart-subtitle {
-    margin-top: 20px;
+    margin-top: 5px;
     margin-bottom: 0;
     color: #c2c2d6;
     font-size: 14px;
@@ -94,7 +94,7 @@ function renderIndustryIconsChart(targetId) {
   const svg = d3.select("#industryIconSvg");
   const tooltip = d3.select("#industryTooltip");
 
-  const margin = { top: 60, right: 320, bottom: 40, left: 440 };
+  const margin = { top: 20, right: 320, bottom: 40, left: 440 };
   const rowHeight = 120;
   const width = 1800;
   const height = margin.top + margin.bottom + rowHeight * data.length;

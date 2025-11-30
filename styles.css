@@ -598,13 +598,13 @@
 
   /* Employment and Addiction Section */
   #section3a {
-    padding: 2rem 1rem;
+    padding: 1rem 1rem;
   }
 
   #section3a .plot-container {
     width: 98%;
     max-width: 2200px;
-    margin: 2rem auto 0;
+    margin: 1rem auto 0;
     background: rgba(255, 255, 255, 0.02);
     border-radius: 12px;
     padding: 1rem;
