@@ -1131,3 +1131,74 @@
   transform: translateY(-3px);
   transition: 0.25s ease;
 }
+
+/* Drugs Quiz Specific Styles */
+#drugs-quiz-container {
+  width: 100%;
+  max-width: 1400px;
+  margin: 0 auto;
+}
+
+#drugs-quiz-charts {
+  display: flex;
+  flex-direction: row;
+  justify-content: center;
+  align-items: flex-start;
+  gap: 40px;
+  flex-wrap: wrap;
+  margin: 40px 0;
+}
+
+.drugs-quiz-column {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 20px;
+  flex: 0 1 300px;
+}
+
+.drugs-quiz-column-title {
+  font-size: 20px;
+  font-weight: 600;
+  text-align: center;
+  color: #fff;
+}
+
+.drugs-quiz-input {
+  width: 120px;
+  padding: 10px;
+  text-align: center;
+  font-size: 16px;
+  border: 2px solid rgba(255, 255, 255, 0.2);
+  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.1);
+  color: #fff;
+}
+
+.drugs-quiz-input:focus {
+  outline: none;
+  border-color: #4DA3FF;
+}
+
+#drugs-quiz-buttons {
+  display: flex;
+  justify-content: center;
+  gap: 20px;
+  margin-top: 30px;
+}
+
+.drugs-quiz-button {
+  padding: 12px 24px;
+  font-size: 16px;
+  font-weight: 600;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  background: #4DA3FF;
+  color: #fff;
+  transition: background 0.3s;
+}
+
+.drugs-quiz-button:hover {
+  background: #3d8fe6;
+}

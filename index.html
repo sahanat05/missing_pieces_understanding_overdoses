@@ -48,43 +48,19 @@
       <script src="https://d3js.org/d3.v7.min.js"></script>
       <script src="visualizations/global-bar-chart.js"></script>
     </section>
-
-   <section class="section" id="section-quiz">
+    <!-- DRUG USE QUIZ -->
+  <section class="section" id="section-quiz">
     <div class="content">
       <h1>Test Your Knowledge</h1>
       <p>What percentage of people have used illicit drugs? Note: Illicit drug use includes the use of marijuana, cocaine, heroin, hallucinogens, inhalants, and methamphetamine, as well as the misuse of prescription drugs (pain relievers, tranquilizers, stimulants, or sedatives)</p>
     </div>
 
-    <div id="quiz-container">
-      <div id="quiz-inputs">
-      <div class="input-box">
-        <label><strong>Lifetime Use</strong></label>
-        <div>
-          <input type="number" id="lifetime-guess" min="0" max="100" step="0.1" placeholder="0">
-          <span>%</span>
-        </div>
-      </div>
-      <div class="input-box">
-        <label><strong>Past Year Use</strong></label>
-        <div>
-          <input type="number" id="pastyear-guess" min="0" max="100" step="0.1" placeholder="0">
-          <span>%</span>
-        </div>
-      </div>
-      <div class="input-box">
-        <label><strong>Past Month Use</strong></label>
-        <div>
-          <input type="number" id="pastmonth-guess" min="0" max="100" step="0.1" placeholder="0">
-          <span>%</span>
-        </div>
-      </div>
-    </div>
+    <div id="drugs-quiz-container">
+      <div id="drugs-quiz-charts"></div>
 
-      <div id="pie-charts"></div>
-
-      <div id="quiz-buttons">
-        <button id="reveal-answer" class="quiz-button">Reveal Actual Percentages</button>
-        <button id="try-again" class="quiz-button" style="display: none;">Try Again</button>
+      <div id="drugs-quiz-buttons">
+        <button id="drugs-quiz-reveal" class="drugs-quiz-button">Reveal Actual Percentages</button>
+        <button id="drugs-quiz-reset" class="drugs-quiz-button" style="display: none;">Try Again</button>
       </div>
     </div>
 
@@ -145,13 +121,13 @@
   </section>
     
       
-
+<!-- DRUG TYPES BUBBLE CHART -->
 <section class="section" id="section3b">
   <div class="content">
     <h1>Substances Driving the Crisis</h1>
     <p>Each circle represents a drug, sized by its contribution to nonfatal overdoses per 100,000 ED visits in 2024. Hover to learn more about each substance.</p>
   </div>
-
+  <div id="drug-bubble-filters" style="text-align: center; margin-bottom: 30px; padding: 20px; background: rgba(255,255,255,0.05); border-radius: 8px;"></div>
   <div id="drug-bubble-chart" style="width: 80%; display: flex; justify-content: center; align-items: center; flex-direction: column;"></div>
   <!-- Load the bubble chart visualization -->
   <script src="visualizations/drug-types-bubbles/drug-bubble-chart.js"></script>
