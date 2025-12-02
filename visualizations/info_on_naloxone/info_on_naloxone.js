@@ -68,102 +68,111 @@
       // ---------- STYLING ----------
       const style = document.createElement("style");
       style.textContent = `
-        #naloxone-info-wrapper {
-          width: 100%;
-          display: flex;
-          justify-content: center;
-          margin-top: 2rem;
-        }
-  
-        .naloxone-slider {
-          width: 90%;
-          max-width: 1100px;
-          position: relative;
-          overflow: hidden;
-          padding: 1rem 0 3.5rem;
-        }
-  
-        .naloxone-track {
-          display: flex;
-          transition: transform 0.6s ease;
-        }
-  
-        .naloxone-slide {
-          min-width: 100%;
-          flex-shrink: 0;
-          background: rgba(255,255,255,0.05);
-          border-radius: 18px;
-          padding: 2.5rem;
-          text-align: center;
-          backdrop-filter: blur(4px);
-        }
-  
-        .naloxone-slide h2 {
-          color: white;
-          font-size: 2rem;
-          margin-bottom: 1rem;
-        }
-  
-        .naloxone-slide p {
-          font-size: 1.2rem;
-          color: #ccc;
-          line-height: 1.6;
-          max-width: 800px;
-          margin: 0 auto;
-        }
-  
-        .nav-arrow {
-          position: absolute;
-          top: 50%;
-          transform: translateY(-50%);
-          background: rgba(255,255,255,0.15);
-          border: none;
-          font-size: 2.3rem;
-          color: white;
-          width: 48px;
-          height: 48px;
-          border-radius: 50%;
-          cursor: pointer;
-          display: flex;
-          justify-content: center;
-          align-items: center;
-          transition: background 0.2s ease;
-        }
-  
-        .nav-arrow:hover {
-          background: rgba(255,255,255,0.25);
-        }
-  
-        .left-arrow {
-          left: 10px;
-        }
-  
-        .right-arrow {
-          right: 10px;
-        }
-  
-        .naloxone-dots {
-          width: 100%;
-          text-align: center;
-          position: absolute;
-          bottom: 12px;
-        }
-  
-        .naloxone-dots .dot {
-          width: 12px;
-          height: 12px;
-          background: #666;
-          border-radius: 50%;
-          display: inline-block;
-          margin: 0 6px;
-          cursor: pointer;
-          transition: background 0.2s ease, transform 0.2s ease;
-        }
-  
-        .naloxone-dots .dot.active {
-          background: #fff;
-          transform: scale(1.2);
-        }
+      /* ---------- STYLING (UPDATED FOR VERTICAL SLIDES) ---------- */
+      #naloxone-info-wrapper {
+        width: 100%;
+        display: flex;
+        justify-content: center;
+        margin-top: 2rem;
+      }
+
+      .naloxone-slider {
+        width: 70%;                          /* narrower width */
+        max-width: 700px;                    /* keeps it slim on desktop */
+        position: relative;
+        overflow: hidden;
+        padding: 1rem 0 3.5rem;
+        margin: 0 auto;
+      }
+
+      .naloxone-track {
+        display: flex;
+        transition: transform 0.6s ease;
+      }
+
+      .naloxone-slide {
+        min-width: 100%;
+        flex-shrink: 0;
+        background: rgba(255,255,255,0.05);
+        border-radius: 18px;
+        padding: 2rem 1.8rem;                /* tighter padding */
+        text-align: center;
+        backdrop-filter: blur(4px);
+        display: flex;                       /* ensures vertical centering */
+        flex-direction: column;
+        justify-content: center;
+        min-height: 350px;                   /* taller card */
+      }
+
+      .naloxone-slide h2 {
+        color: white;
+        font-size: 1.8rem;                   /* slightly smaller */
+        margin-bottom: 1rem;
+      }
+
+      .naloxone-slide p {
+        font-size: 1.05rem;
+        color: #ccc;
+        line-height: 1.55;
+        max-width: 500px;                    /* much slimmer */
+        margin: 0 auto;
+      }
+
+      .nav-arrow {
+        position: absolute;
+        top: 50%;
+        transform: translateY(-50%);
+        background: none;                     /* remove circles */
+        border: none;
+        width: 0;
+        height: 0;
+        border-style: solid;
+        cursor: pointer;
+        opacity: 0.9;
+        transition: opacity 0.2s ease;
+      }
+
+      /* Left triangle */
+      .left-arrow {
+        border-width: 18px 22px 18px 0;
+        border-color: transparent white transparent transparent;
+        left: 30px;                          /* tuck in more */
+      }
+
+      /* Right triangle */
+      .right-arrow {
+        border-width: 18px 0 18px 22px;
+        border-color: transparent transparent transparent white;
+        right: 30px;                         /* tuck in more */
+      }
+
+      .nav-arrow:hover {
+        opacity: 0.6;
+      }
+
+      .naloxone-dots {
+        width: 100%;
+        text-align: center;
+        position: absolute;
+        bottom: 8px;
+      }
+
+      .naloxone-dots .dot {
+        width: 10px;
+        height: 10px;
+        background: #666;
+        border-radius: 50%;
+        display: inline-block;
+        margin: 0 5px;
+        cursor: pointer;
+        transition: background 0.2s ease, transform 0.2s ease;
+      }
+
+      .naloxone-dots .dot.active {
+        background: #fff;
+        transform: scale(1.15);
+      }
+
       `;
       document.head.appendChild(style);
   

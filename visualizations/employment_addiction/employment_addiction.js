@@ -130,7 +130,7 @@ function renderIndustryIconsChart(targetId) {
   <div class="chart-wrapper">
     <svg id="industryIconSvg"></svg>
 
-    <!-- ⭐ NEW RIGHT-SIDE LEGEND ⭐ -->
+    <!-- NEW RIGHT-SIDE LEGEND -->
     <div class="vertical-rank-legend">
       <span class="rank-high">Highest</span>
       <div class="rank-line"></div>

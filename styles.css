@@ -647,6 +647,34 @@
   z-index: 1000;
 }
 
+#linechart-hint {
+  position: absolute;
+  top: 40px;
+  right: 180px;
+  color: rgba(255,255,255,0.7);
+  font-size: 1rem;
+  font-weight: 500;
+  animation: hintFade 2.5s ease-in-out infinite;
+  pointer-events: none;
+}
+
+@keyframes hintFade {
+  0%, 100% { opacity: 0.2; }
+  50% { opacity: 1; }
+}
+
+.year-dot {
+  animation: dotPulse 2.5s ease-out infinite;
+}
+
+@keyframes dotPulse {
+  0% { r: 6; opacity: 0.7; }
+  50% { r: 9; opacity: 1; }
+  100% { r: 6; opacity: 1; }
+}
+
+
+
 
   /* Employment and Addiction Section */
   #section3a {
