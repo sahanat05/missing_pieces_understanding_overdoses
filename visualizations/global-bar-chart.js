@@ -106,6 +106,35 @@ function initGlobalOverdoseVisualization() {
         highlightBar(index);
         window.frames[0].postMessage({type: 'selectCountry', index: index}, '*');
       });
+    
+    showClickHint();
+  }
+
+  function showClickHint() {
+    const hint = d3.select("#overdose-bar-chart")
+      .append("div")
+      .style("position", "absolute")
+      .style("top", "50%")
+      .style("left", "50%")
+      .style("transform", "translate(-50%, -50%)")
+      .style("background", "rgba(0, 0, 0, 0.9)")
+      .style("color", "white")
+      .style("padding", "15px 25px")
+      .style("border-radius", "8px")
+      .style("font-size", "16px")
+      .style("z-index", "1000")
+      .style("opacity", "0")
+      .style("pointer-events", "none")
+      .text("Click on any bar to explore!");
+    
+    hint.transition()
+      .duration(300)
+      .style("opacity", "1")
+      .transition()
+      .delay(2500)
+      .duration(300)
+      .style("opacity", "0")
+      .remove();
   }
 
   // Listen for messages from globe
