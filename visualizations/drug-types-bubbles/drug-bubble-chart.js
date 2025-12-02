@@ -20,19 +20,39 @@
 
     // Get container dimensions for responsive sizing
     const containerWidth = container.clientWidth;
+    const listWidth = 200; // Width for the drug list on the right
     const margin = { top: 10, right: 30, bottom: 20, left: 30 };
-    const width = containerWidth - 40 - margin.left - margin.right;
+    const width = containerWidth - 40 - margin.left - margin.right - listWidth - 40; // Reserve space for list
     const height = 550 - margin.top - margin.bottom;
 
+    // Create main container div
+    const mainContainer = d3.select("#drug-bubble-chart")
+      .style("display", "flex")
+      .style("justify-content", "space-between")
+      .style("align-items", "flex-start")
+      .style("gap", "40px");
+
+    // Create SVG container
+    const svgContainer = mainContainer.append("div")
+      .style("flex", "1");
+
     // Create SVG
-    const svg = d3.select("#drug-bubble-chart")
+    const svg = svgContainer
       .append("svg")
       .attr("width", width + margin.left + margin.right)
       .attr("height", height + margin.top + margin.bottom)
       .style("display", "block")
-      .style("margin", "0 auto")
       .append("g")
       .attr("transform", `translate(${margin.left + width/2}, ${margin.top + height / 2})`);
+
+    // Create drug list container
+    const listContainer = mainContainer.append("div")
+      .attr("class", "drug-rate-list")
+      .style("width", listWidth + "px")
+      .style("padding", "20px")
+      .style("background", "rgba(255, 255, 255, 0.05)")
+      .style("border-radius", "10px")
+      .style("box-shadow", "0 2px 8px rgba(0,0,0,0.1)");
 
     // Tooltip
     const tooltip = d3.select("body")
@@ -50,8 +70,8 @@
       .style("z-index", "1000")
       .style("box-shadow", "0 4px 6px rgba(0,0,0,0.3)");
 
-    // SCALE FOR BUBBLE SIZES, FEEL FREE TO CHANGE :)
-    const sizeScale = d3.scaleSqrt().range([50, 150]);
+    // -------- SCALE FOR BUBBLE SIZES, FEEL FREE TO CHANGE :) ------------
+    const sizeScale = d3.scaleSqrt().range([35, 150]);
 
 
     // Animation control
@@ -67,14 +87,101 @@
       gender: null
     };
 
+    // Function to update the drug rate list
+    function updateDrugList(data) {
+      // Sort data by deaths (rate) in descending order
+      const sortedData = [...data].sort((a, b) => b.deaths - a.deaths);
+      
+      // Find the maximum rate
+      const maxRate = d3.max(sortedData, d => d.deaths);
+
+      // Bind data to list items
+      const listItems = listContainer.selectAll(".drug-list-item")
+        .data(sortedData, d => d.name);
+
+      // Remove old items
+      listItems.exit()
+        .transition()
+        .duration(400)
+        .style("opacity", 0)
+        .style("transform", "translateX(20px)")
+        .remove();
+
+      // Add new items
+      const itemsEnter = listItems.enter()
+        .append("div")
+        .attr("class", "drug-list-item")
+        .style("margin-bottom", "10px")
+        .style("opacity", 0)
+        .style("transform", "translateX(20px)")
+        .style("transition", "all 0.5s ease")
+        .style("padding", "10px")
+        .style("border-radius", "8px");
+
+      // Drug name
+      itemsEnter.append("div")
+        .attr("class", "drug-name")
+        .style("font-size", "14px")
+        .style("font-weight", "500")
+        .style("margin-bottom", "4px")
+        .style("color", "#ddd")
+        .text(d => d.name);
+
+      // Drug rate
+      itemsEnter.append("div")
+        .attr("class", "drug-rate")
+        .style("font-size", "28px")
+        .style("font-weight", "bold")
+        .style("line-height", "1")
+        .style("color", d => d.color)
+        .text(d => d.deaths.toFixed(1));
+
+      // Merge and update all items
+      const allItems = itemsEnter.merge(listItems);
+
+      // Highlight the highest rate item with subtle red danger styling
+      allItems
+        .style("background", d => d.deaths === maxRate && d.deaths > 0 ? "rgba(255, 68, 68, 0.08)" : "transparent")
+        .style("border", d => d.deaths === maxRate && d.deaths > 0 ? "2px solid rgba(255, 68, 68, 0.3)" : "2px solid transparent");
+
+      // Animate items into view with staggered delay
+      allItems
+        .transition()
+        .duration(500)
+        .delay((d, i) => i * 50)
+        .style("opacity", 1)
+        .style("transform", "translateX(0)");
+
+      // Update rates with smooth number transitions
+      allItems.select(".drug-rate")
+        .transition()
+        .duration(500)
+        .style("color", d => d.color)
+        .style("font-size", d => d.deaths === maxRate && d.deaths > 0 ? "30px" : "28px") // Slightly larger for highest
+        .style("text-shadow", d => d.deaths === maxRate && d.deaths > 0 ? "0 0 6px rgba(255, 68, 68, 0.3)" : "none") // Subtle glow
+        .tween("text", function(d) {
+          const node = this;
+          const currentText = node.textContent;
+          const currentValue = parseFloat(currentText) || 0;
+          const interpolator = d3.interpolateNumber(currentValue, d.deaths);
+          
+          return function(t) {
+            node.textContent = interpolator(t).toFixed(1);
+          };
+        });
+    }
+
     // Function to create or update bubbles
-    function updateBubbles(data, isInitial = false) {
+    function updateBubbles(dataObj, isInitial = false) {
+      const data = dataObj.nonZero; // Use only non-zero drugs for bubbles
+      const allDrugs = dataObj.all; // Use all drugs for labels
 
 
       // --- DYNAMIC AUTO-SPACING LAYOUT THAT MORPHS SMOOTHLY ---
 
+      const numBubbles = data.length;
       const rowCount = 2;
-      const colCount = 3;
+      const colCount = Math.ceil(numBubbles / rowCount); // Dynamic column count
       const padding = 0; // bubbles should touch
 
       // Compute radii
@@ -83,34 +190,45 @@
       // Compute row heights based on largest radius in each row
       const rowHeights = [];
       for (let r = 0; r < rowCount; r++) {
-        const maxRadius = d3.max(radii.slice(r * colCount, (r + 1) * colCount));
-        rowHeights.push(maxRadius * 2 + padding);
+        const rowBubbles = radii.slice(r * colCount, Math.min((r + 1) * colCount, numBubbles));
+        if (rowBubbles.length > 0) {
+          const maxRadius = d3.max(rowBubbles);
+          rowHeights.push(maxRadius * 2 + padding);
+        }
       }
 
-      const totalHeight = rowHeights[0] + rowHeights[1];
+      const totalHeight = rowHeights.reduce((sum, h) => sum + h, 0);
 
-      // Center both rows vertically around (0,0)
-      const yOffsets = [
-        -totalHeight / 4,
-        totalHeight / 4
-      ];
+      // Center rows vertically around (0,0)
+      let yOffset = -totalHeight / 2;
+      const yOffsets = [];
+      for (let r = 0; r < rowCount; r++) {
+        if (rowHeights[r]) {
+          yOffsets.push(yOffset + rowHeights[r] / 2);
+          yOffset += rowHeights[r];
+        }
+      }
 
       let newNodes = [];
 
       for (let r = 0; r < rowCount; r++) {
+        const startIdx = r * colCount;
+        const endIdx = Math.min((r + 1) * colCount, numBubbles);
+        
+        if (startIdx >= numBubbles) break; // No more bubbles
         
         // Radii for this row
-        const rowR = radii.slice(r * colCount, (r + 1) * colCount);
+        const rowR = radii.slice(startIdx, endIdx);
+        const rowData = data.slice(startIdx, endIdx);
 
         // Total row width = sum(diameters) + padding
-        const totalRowWidth = d3.sum(rowR.map(x => x * 2)) + padding * (colCount - 1);
+        const totalRowWidth = d3.sum(rowR.map(x => x * 2)) + padding * (rowData.length - 1);
 
         // Start X so row is perfectly centered
         let xPos = -totalRowWidth / 2;
 
-        for (let c = 0; c < colCount; c++) {
-          const idx = r * colCount + c;
-          const d = data[idx];
+        for (let c = 0; c < rowData.length; c++) {
+          const d = rowData[c];
           const radius = rowR[c];
 
           const targetX = xPos + radius;
@@ -138,6 +256,29 @@
       }
 
       nodes = newNodes;
+
+      // Create label nodes for ALL drugs (including zero-rate ones)
+      const labelNodes = allDrugs.map((drug, index) => {
+        const bubbleNode = nodes.find(n => n.name === drug.name);
+        if (bubbleNode) {
+          // Drug has a bubble, use its position
+          return bubbleNode;
+        } else {
+          // Zero-rate drug, position it below the bubbles in a row
+          const zeroRateIndex = allDrugs.slice(0, index).filter(d => d.deaths === 0).length;
+          return {
+            ...drug,
+            x: -150 + (zeroRateIndex * 100), // Position horizontally
+            y: height / 2 - 80, // Position below bubbles
+            targetX: -150 + (zeroRateIndex * 100),
+            targetY: height / 2 - 80,
+            radius: 0
+          };
+        }
+      });
+
+      // Update the drug list with all drugs (including zero-rate)
+      updateDrugList(allDrugs);
 
       // Smoothly interpolate positions toward new target
       svg.selectAll(".drug-bubble")
@@ -196,10 +337,16 @@
       // Merge and update ALL circles (both new and existing)
       const allCircles = circlesEnter.merge(circles);
 
+      // Find the drug with the highest rate
+      const maxRateBubble = d3.max(nodes, d => d.deaths);
+
       // Set radius immediately so physics & SVG match
       allCircles
         .attr("r", d => d.radius)
-        .style("opacity", 0.8);
+        .style("opacity", 0.8)
+        .attr("stroke", d => d.deaths === maxRateBubble ? "#ff7171ff" : "#fff") // Red stroke for highest
+        .attr("stroke-width", d => d.deaths === maxRateBubble ? 3 : 2) // Slightly thicker stroke for highest
+        .style("filter", d => d.deaths === maxRateBubble ? "drop-shadow(0 0 8px rgba(255, 68, 68, 0.5))" : "none"); // Subtle red glow
 
       // Now update simulation forces with new radii
       simulation.force("collision").radius(d => d.radius);
@@ -243,9 +390,12 @@
           tooltip.style("visibility", "hidden");
         });
 
-      // Bind data to labels
+      // Bind data to labels - Sort by rate (highest first) for z-index ordering
+      // Use labelNodes which includes all drugs (even zero-rate ones)
+      const sortedLabelNodes = [...labelNodes].sort((a, b) => b.deaths - a.deaths);
+      
       const labels = svg.selectAll(".drug-label")
-        .data(nodes, d => d.name);
+        .data(sortedLabelNodes, d => d.name);
 
       // Remove labels that are no longer needed
       labels.exit()
@@ -270,17 +420,29 @@
       // Merge and update ALL labels
       const allLabels = labelsEnter.merge(labels);
 
+      // Find the drug with the highest rate
+      const maxRate = d3.max(labelNodes, d => d.deaths);
+
       allLabels
         .text(d => d.name)
         .transition()
         .duration(isInitial ? 1000 : 700)
         .delay(isInitial ? (d, i) => i * 100 + 400 : 0)
         .style("font-size", d => {
+          if (d.deaths === maxRate && d.deaths > 0) return "19px"; // Slightly larger for highest rate
+          if (d.deaths === 0) return "12px"; // Smaller font for zero-rate drugs
           if (d.radius > 90) return "18px";
           if (d.radius > 60) return "14px";
           return "9px";
         })
-        .style("opacity", 1);
+        .style("opacity", 1) // Show all labels
+        .style("fill", d => {
+          if (d.deaths === 0) return "#888"; // Gray for zero-rate
+          if (d.deaths === maxRate) return "rgba(255, 242, 242, 1)"; // Softer red for highest rate
+          return "white"; // White for others
+        })
+        .style("font-weight", d => d.deaths === maxRate && d.deaths > 0 ? "900" : "bold") // Extra bold for highest
+        .style("text-shadow", d => d.deaths === maxRate && d.deaths > 0 ? "0 0 6px rgba(255, 68, 68, 0.4)" : "none"); // Subtle red glow
 
       // Update positions on simulation tick
       simulation.on("tick", () => {
@@ -356,7 +518,10 @@
         };
       });
 
-      return aggregatedData;
+      return {
+        all: aggregatedData, // All drugs including zero-rate ones
+        nonZero: aggregatedData.filter(drug => drug.deaths > 0) // Only drugs with rates > 0
+      };
     }
 
     // Function to update visualization based on filter
