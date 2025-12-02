@@ -1,66 +1,147 @@
-# cs171_final_project
+# Missing Pieces: Understanding Overdoses Beyond the Statistics
 
-Final project repository for cs171 - Missing Pieces: Understanding Overdoses Beyond the Statistics
+An interactive data visualization website exploring the global overdose crisis through statistics, personal stories, and community solutions.
+
+## Table of Contents
+- [Description](#description)
+- [How to Run](#how-to-run)
+- [Libraries and Dependencies](#libraries-and-dependencies)
+- [Project Structure](#project-structure)
+- [Features](#features)
+- [Data Sources](#data-sources)
+- [Browser Requirements](#browser-requirements)
 
 ## Description
 
-An interactive scrolling website that explores overdose data beyond the statistics, using a smooth section-based navigation system.
+This project is an interactive scrolling website that presents overdose data through multiple visualization techniques including choropleth maps, line charts, bubble charts, Sankey diagrams, and interactive quizzes. The site combines quantitative data with qualitative storytelling to provide a comprehensive understanding of the overdose crisis.
 
 ## How to Run
 
-Since this is currently a pure HTML/CSS/JavaScript website with no dependencies, you can run it in several ways:
+This is a client-side web application with no build process required. All dependencies are loaded via CDN.
 
-### Option 1: Open directly in browser
-Simply double-click on `index.html` to open it in your default web browser.
+### Option 1: Open Directly in Browser
+Simply double-click `index.html` to open it in your default web browser.
 
-### Option 2: Use a local server (recommended)
-To avoid any potential CORS issues with certain browsers, you can use a local development server:
+### Option 2: Use a Local Server (Recommended)
+To avoid potential issues when loading data files and iframes, use a local development server:
 
-#### Using Python:
-```bash
-# Python 3
-python -m http.server 8000
+#### Using VS Code Live Server:
+1. Install the "Live Server" extension
+2. Right-click on `index.html`
+3. Select "Open with Live Server"
 
-# Python 2
-python -m SimpleHTTPServer 8000
-```
+## Libraries and Dependencies
 
-Then open your browser and navigate to: `http://localhost:8000`
+All libraries are loaded via CDN (no installation required):
 
-#### Using Node.js:
-If you have Node.js installed, you can use the `http-server` package:
-```bash
-npm install -g http-server
-http-server
-```
+### Core Visualization Library
+- **D3.js v7** (`https://d3js.org/d3.v7.min.js`)
+  - Used for all data visualizations including charts, maps, and interactive elements
+  - Powers: bar charts, line charts, bubble charts, choropleth maps, Sankey diagrams
 
-Then open your browser and navigate to: `http://localhost:8000`
+### Supporting Libraries
+- **TopoJSON Client v3** (`https://cdn.jsdelivr.net/npm/topojson-client@3`)
+  - Converts TopoJSON files to GeoJSON for map rendering
+  - Used in: US choropleth map, global map visualizations
 
-## Features
-<!-- 
-- **Smooth Scrolling**: Vertical scroll with snap-to-section behavior
-- **Navigation Indicators**: Click the right-side dots to jump to different sections
-- **Keyboard Navigation**: Use arrow keys to navigate between sections
-- **Responsive Design**: Works on desktop and mobile devices -->
+- **D3-Sankey v0.12.3** (`https://unpkg.com/d3-sankey@0.12.3/dist/d3-sankey.min.js`)
+  - Creates flow diagrams showing the prescription opioid pipeline
+  - Used in: Section 9 (Addiction Pipeline)
 
-<!-- ## Project Structure
+### Native Browser APIs
+- **Intersection Observer API** - Triggers animations when sections scroll into view
+- **HTML5 Audio API** - Plays personal story audio clips with synchronized transcripts
+- **CSS Scroll Snap** - Provides smooth section-to-section scrolling
+
+## Project Structure
 
 ```
 cs171_final_project/
 │
-├── index.html      # Main HTML file
-├── styles.css      # Stylesheet
-├── script.js       # JavaScript for navigation
-└── README.md       # This file
+├── index.html                  # Main HTML file with all sections
+├── styles.css                  # Global styles and section-specific CSS
+├── script.js                   # Navigation, scroll indicators, audio controls
+├── README.md                   # This file
+│
+├── data/                       # All datasets and media files
+│   ├── overdose_rates.csv
+│   ├── overdose_rates_us.csv
+│   ├── naloxone_distribution.csv
+│   ├── DOSE_SyS_Dashboard_Download_10-23-2025 - Overall.csv
+│   ├── jonathans_story.mp3
+│   ├── sofias_story.mp3
+│   ├── jakes_story.mp3
+│   └── *.png                   # Story images
+│
+└── visualizations/             # Modular visualization components
+    ├── hero-typewriter/
+    │   └── herotypewriter.js
+    ├── global-bar-chart.js
+    ├── drug-quiz/
+    │   └── drug-quiz.js
+    ├── us-choropleth/
+    │   └── us-overdose-map.js
+    ├── age-line-chart/
+    │   └── age-line-chart.js
+    ├── employment-addiction/
+    │   └── employment-addiction.js
+    ├── stories/
+    │   └── stories.js
+    ├── drug-types-bubbles/
+    │   └── drug-bubble-chart.js
+    ├── sankey-addiction-pipeline/
+    │   └── addiction-pipeline.js
+    ├── naloxone-quiz/
+    │   └── naloxonequiz.js
+    ├── info-on-naloxone/
+    │   └── info-on-naloxone.js
+    ├── naloxone-distribution/
+    │   └── bar-and-line-graph.js
+    └── solution-in-focus/
+        └── solution-in-focus.html
 ```
 
-## Requirements
+## Features
 
-- A modern web browser (Chrome, Firefox, Safari, Edge)
-- No additional dependencies or installations needed -->
+### Interactive Visualizations
+- **Global Bar Chart** - Top countries by overdose death rates
+- **Interactive World Map** - Explore overdose rates by country
+- **US Choropleth Map** - State-by-state overdose statistics
+- **Age Group Line Chart** - Trends over time by demographic
+- **Industry Bubble Chart** - Substance use patterns across professions
+- **Drug Type Bubbles** - Substances driving the crisis
+- **Sankey Diagram** - Prescription opioid pipeline flow
+- **Naloxone Distribution Charts** - Bar and line graphs showing naloxone access
 
-## Usage
+### Interactive Elements
+- **Knowledge Quizzes** - Test understanding of drug use statistics and naloxone awareness
+- **Audio Stories** - Personal narratives with synchronized transcripts
+- **Story Gallery** - Navigate through multiple personal accounts
+- **Solutions Map** - Community programs making an impact
 
-- Scroll down to move through sections automatically
-- Click the indicators on the right side to jump to specific sections
-- Use the Up/Down arrow keys on your keyboard to navigate
+### Navigation
+- **Smooth Scrolling** - Snap-to-section behavior for seamless transitions
+- **Scroll Indicators** - 14 dots on the right side for quick section jumping
+- **Keyboard Navigation** - Arrow keys to move between sections
+- **Responsive Design** - Adapts to different screen sizes
+
+
+## Data Sources
+
+- **World Health Organization (WHO)** - Global overdose statistics
+- **Centers for Disease Control and Prevention (CDC)** - US overdose data
+- **National Institutes of Health (NIH)** - Research data and treatment statistics
+- **Global Drug Observatory** - International drug use patterns
+- **SAMHSA** - Substance use and mental health data
+
+
+## Credits
+
+**Course:** CS171 - Visualization  
+**Project:** Final Project  
+**Theme:** Missing Pieces: Understanding Overdoses Beyond the Statistics  
+**Developed by:** Sahana Thayagabalu, Carolyn Dorantes, Kathrine Alderete
+
+---
+
+For questions or issues, please refer to the course materials or contact the development team.
