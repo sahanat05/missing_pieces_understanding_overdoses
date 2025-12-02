@@ -89,41 +89,25 @@
   <!-- ============================================================
        3. TEST YOUR KNOWLEDGE (DRUG-USE QUIZ)
        ============================================================ -->
-  <section id="section3" class="section">
-    <div class="content">
-      <h1>Test Your Knowledge</h1>
-      <p>What percentage of Americans have used illicit drugs?</p>
-    </div>
-
-    <div id="quiz-container">
-      <div id="quiz-inputs">
-        <div class="input-box">
-          <label><strong>Lifetime Use</strong></label>
-          <div><input type="number" id="lifetime-guess" step="0.1" /><span>%</span></div>
+      <section class="section" id="section-quiz">
+        <div class="content">
+          <h1>Test Your Knowledge</h1>
+          <p>What percentage of people have used illicit drugs? Note: Illicit drug use includes the use of marijuana, cocaine, heroin, hallucinogens, inhalants, and methamphetamine, as well as the misuse of prescription drugs (pain relievers, tranquilizers, stimulants, or sedatives)</p>
         </div>
 
-        <div class="input-box">
-          <label><strong>Past Year Use</strong></label>
-          <div><input type="number" id="pastyear-guess" step="0.1" /><span>%</span></div>
+        <div id="drugs-quiz-container">
+          <div id="drugs-quiz-charts"></div>
+
+          <div id="drugs-quiz-buttons">
+            <button id="drugs-quiz-reveal" class="drugs-quiz-button">Reveal Actual Percentages</button>
+            <button id="drugs-quiz-reset" class="drugs-quiz-button" style="display: none;">Try Again</button>
+          </div>
         </div>
 
-        <div class="input-box">
-          <label><strong>Past Month Use</strong></label>
-          <div><input type="number" id="pastmonth-guess" step="0.1" /><span>%</span></div>
-        </div>
-      </div>
-
-      <div id="pie-charts"></div>
-
-      <div id="quiz-buttons">
-        <button id="reveal-answer" class="quiz-button">Reveal Actual Percentages</button>
-        <button id="try-again" class="quiz-button" style="display:none;">Try Again</button>
-      </div>
-    </div>
-
-    <link rel="stylesheet" href="visualizations/drug-quiz/drug-quiz.css" />
-    <script src="visualizations/drug-quiz/drug-quiz.js"></script>
-  </section>
+        <link rel="stylesheet" href="visualizations/drug-quiz/drug-quiz.css">
+        <script src="https://d3js.org/d3.v7.min.js"></script>
+        <script src="visualizations/drug-quiz/drug-quiz.js"></script>
+      </section>
 
 
   <!-- ============================================================
@@ -283,7 +267,7 @@
       <h1>Substances Driving the Crisis</h1>
       <p>Each bubble represents a drug, sized by its impact.</p>
     </div>
-
+    <div id="drug-bubble-filters" style="text-align: center; margin-bottom: 30px; padding: 20px; background: rgba(255,255,255,0.05); border-radius: 8px;"></div>
     <div id="drug-bubble-chart" style="width:80%; margin:auto;"></div>
     <script src="visualizations/drug-types-bubbles/drug-bubble-chart.js"></script>
   </section>

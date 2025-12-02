@@ -1,5 +1,5 @@
 // ======================================================
-//   Drug Use Guessing Quiz — Clean/Modern D3 Version
+//   Drug Use Guessing Quiz — Three Column Layout
 //   Fits the aesthetic of your overdose dashboards
 // ======================================================
 (function () {
@@ -29,26 +29,25 @@
       { id: "pastmonth", title: "Past Month Use", actual: actual.pastMonth },
     ];
 
-    // Inputs / Buttons
-    const inputs = {
-      lifetime: document.getElementById("lifetime-guess"),
-      pastyear: document.getElementById("pastyear-guess"),
-      pastmonth: document.getElementById("pastmonth-guess"),
-    };
-
-    const revealBtn = document.getElementById("reveal-answer");
-    const resetBtn = document.getElementById("try-again");
+    // Buttons
+    const revealBtn = document.getElementById("drugs-quiz-reveal");
+    const resetBtn = document.getElementById("drugs-quiz-reset");
 
     // Container
-    const pieChartsContainer = d3.select("#pie-charts");
+    const pieChartsContainer = d3.select("#drugs-quiz-charts");
+
+    // Store input references
+    const inputs = {};
 
     let revealed = false;
 
     // =============================
-    // 2. CREATE CHARTS
+    // 2. CREATE COLUMNS WITH CHARTS
     // =============================
     charts.forEach((cfg) => {
-      createPie(cfg);
+      const column = createColumn(cfg);
+      inputs[cfg.id] = column.input;
+      
       inputs[cfg.id].addEventListener("input", () => {
         const val = parseFloat(inputs[cfg.id].value) || 0;
         updatePie(cfg.id, val, cfg.actual, revealed);
@@ -65,9 +64,9 @@
         pastmonth: parseFloat(inputs.pastmonth.value) || 0,
       };
 
-      // Prevent empty submission
-      if (!guesses.lifetime && !guesses.pastyear && !guesses.pastmonth) {
-        alert("Please enter at least one guess to begin!");
+      // Require ALL inputs to have values
+      if (!guesses.lifetime || !guesses.pastyear || !guesses.pastmonth) {
+        alert("Please enter a percentage for all three categories!");
         return;
       }
 
@@ -102,17 +101,50 @@
     });
 
     // =============================
-    // 5. PIE CREATION
+    // 5. COLUMN CREATION
     // =============================
-    function createPie(cfg) {
-      const wrap = pieChartsContainer
+    function createColumn(cfg) {
+      // Create column wrapper
+      const column = pieChartsContainer
         .append("div")
-        .attr("class", "pie-block")
-        .attr("id", `pie-${cfg.id}`);
+        .attr("class", "drugs-quiz-column")
+        .attr("id", `drugs-quiz-column-${cfg.id}`);
 
-      wrap.append("div")
-        .attr("class", "pie-header")
+      // Add title
+      column.append("div")
+        .attr("class", "drugs-quiz-column-title")
         .text(cfg.title);
+
+      // Add input
+      const inputNode = column.append("input")
+        .attr("type", "number")
+        .attr("class", "drugs-quiz-input")
+        .attr("id", `drugs-quiz-${cfg.id}-input`)
+        .attr("placeholder", "Enter %")
+        .attr("min", "0")
+        .attr("max", "100")
+        .attr("step", "0.1")
+        .node();
+
+      // Add pie chart
+      createPie(column, cfg);
+
+      return {
+        input: inputNode,
+        column: column
+      };
+    }
+
+    // =============================
+    // 6. PIE CREATION
+    // =============================
+    function createPie(column, cfg) {
+      const wrap = column
+        .append("div")
+        .attr("class", "drugs-quiz-pie-block")
+        .attr("id", `drugs-quiz-pie-${cfg.id}`)
+        .style("display", "flex")
+        .style("justify-content", "center");
 
       // SVG setup
       const size = 260;
@@ -123,20 +155,24 @@
         .append("g")
         .attr("transform", `translate(${size / 2}, ${size / 2})`);
 
+      // Background circle - transparent fill, white stroke
       svg.append("circle")
-        .attr("class", "pie-bg")
-        .attr("r", 110);
+        .attr("class", "drugs-quiz-pie-bg")
+        .attr("r", 110)
+        .attr("fill", "transparent")
+        .attr("stroke", "#fff")
+        .attr("stroke-width", 2);
 
-      svg.append("g").attr("class", "guess-layer");
-      svg.append("g").attr("class", "actual-layer");
-      svg.append("g").attr("class", "label-layer");
+      svg.append("g").attr("class", "drugs-quiz-guess-layer");
+      svg.append("g").attr("class", "drugs-quiz-actual-layer");
+      svg.append("g").attr("class", "drugs-quiz-label-layer");
     }
 
     // =============================
-    // 6. PIE UPDATE
+    // 7. PIE UPDATE
     // =============================
     function updatePie(id, guess, actualVal, showActual) {
-      const g = d3.select(`#pie-${id} svg g`);
+      const g = d3.select(`#drugs-quiz-pie-${id} svg g`);
       const radius = 110;
 
       const pie = d3.pie().value((d) => d).sort(null);
@@ -147,13 +183,13 @@
       const guessData = pie([guess, 100 - guess]);
       const actualData = pie([actualVal, 100 - actualVal]);
 
-      // Guess arcs
-      const guessLayer = g.select(".guess-layer").selectAll("path").data(guessData);
+      // Guess arcs - Light Red
+      const guessLayer = g.select(".drugs-quiz-guess-layer").selectAll("path").data(guessData);
 
       guessLayer.enter()
         .append("path")
         .merge(guessLayer)
-        .attr("fill", (_, i) => (i === 0 ? "#4DA3FF" : "rgba(255,255,255,0.08)"))
+        .attr("fill", (_, i) => (i === 0 ? "#FF7B7B" : "transparent"))
         .attr("stroke", "#fff")
         .attr("stroke-width", 2)
         .transition()
@@ -163,14 +199,14 @@
           return (t) => arcGuess(i(t));
         });
 
-      // Actual arcs
-      const actualLayer = g.select(".actual-layer").selectAll("path").data(showActual ? actualData : []);
+      // Actual arcs - Vibrant Red
+      const actualLayer = g.select(".drugs-quiz-actual-layer").selectAll("path").data(showActual ? actualData : []);
 
       actualLayer.enter()
         .append("path")
         .merge(actualLayer)
-        .attr("fill", (_, i) => (i === 0 ? "rgba(0, 255, 140, 0.6)" : "transparent"))
-        .attr("stroke", (_, i) => (i === 0 ? "#00FF8C" : "transparent"))
+        .attr("fill", (_, i) => (i === 0 ? "rgba(255, 51, 51, 0.6)" : "transparent"))
+        .attr("stroke", (_, i) => (i === 0 ? "#FF3333" : "transparent"))
         .attr("stroke-width", 3)
         .attr("stroke-dasharray", "6,4")
         .transition()
@@ -180,22 +216,32 @@
           return (t) => arcActual(i(t));
         });
 
-      // Labels
-      const labelLayer = g.select(".label-layer");
+      actualLayer.exit().remove();
+
+      // Labels - White text
+      const labelLayer = g.select(".drugs-quiz-label-layer");
       labelLayer.selectAll("*").remove();
 
       // Guess label
       labelLayer
         .append("text")
-        .attr("class", "pie-label-guess")
+        .attr("class", "drugs-quiz-pie-label-guess")
         .attr("y", showActual ? -12 : 5)
+        .attr("fill", "#fff")
+        .attr("font-size", "24px")
+        .attr("font-weight", "600")
+        .attr("text-anchor", "middle")
         .text(`${guess.toFixed(1)}%`);
 
       if (showActual) {
         labelLayer
           .append("text")
-          .attr("class", "pie-label-actual")
+          .attr("class", "drugs-quiz-pie-label-actual")
           .attr("y", 12)
+          .attr("fill", "#fff")
+          .attr("font-size", "20px")
+          .attr("font-weight", "500")
+          .attr("text-anchor", "middle")
           .text(`${actualVal.toFixed(1)}%`);
 
         const diff = guess - actualVal;
@@ -208,8 +254,12 @@
 
         labelLayer
           .append("text")
-          .attr("class", "pie-label-error")
+          .attr("class", "drugs-quiz-pie-label-error")
           .attr("y", 34)
+          .attr("fill", "#fff")
+          .attr("font-size", "16px")
+          .attr("font-weight", "400")
+          .attr("text-anchor", "middle")
           .text(msg);
       }
     }

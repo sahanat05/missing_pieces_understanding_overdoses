@@ -1,4 +1,4 @@
-// Drug overdose bubble chart visualization - Real dataset version
+// Drug overdose bubble chart visualization - With Filters
 (function() {
   'use strict';
 
@@ -10,7 +10,7 @@
   }
 
   function initBubbleChart() {
-    console.log("Initializing drug bubble chart...");
+    console.log("Initializing drug bubble chart with filters...");
 
     // Check if container exists
     const container = document.getElementById('drug-bubble-chart');
@@ -55,12 +55,20 @@
 
     // Bubble size scale
     const sizeScale = d3.scaleSqrt()
-      .range([30, 105]); // bubble size range
+      .range([30, 105]);
 
     // Animation control
     let hasAnimated = false;
     let nodes = null;
     let simulation = null;
+    let fullData = null;
+
+    // Current filter state
+    let currentFilter = {
+      type: 'overall', // 'overall', 'age', 'gender'
+      age: null,
+      gender: null
+    };
 
     // Function to create bubbles
     function createBubbles(data, animate = false) {
@@ -119,12 +127,16 @@
 
       const allCircles = circlesEnter.merge(circles);
 
-      // Animate only if flag is set
+      // Animate if flag is set
       if (animate) {
         allCircles
           .transition()
           .duration(1000)
-          .delay((d, i) => i * 100) // stagger animation
+          .delay((d, i) => i * 100)
+          .attr("r", d => d.radius)
+          .style("opacity", 0.8);
+      } else {
+        allCircles
           .attr("r", d => d.radius)
           .style("opacity", 0.8);
       }
@@ -192,8 +204,10 @@
         allLabels
           .transition()
           .duration(1000)
-          .delay((d, i) => i * 100 + 400) // delay after bubbles start
+          .delay((d, i) => i * 100 + 400)
           .style("opacity", 1);
+      } else {
+        allLabels.style("opacity", 1);
       }
 
       // Update on tick
@@ -210,36 +224,10 @@
       console.log("Bubbles created successfully");
     }
 
-    // Function to trigger animation
-    function triggerAnimation() {
-      if (simulation && nodes) {
-        console.log("Triggering bubble animation!");
-        
-        // Restart simulation
-        simulation.alpha(1).restart();
-        
-        // Animate bubbles
-        svg.selectAll(".drug-bubble")
-          .transition()
-          .duration(1000)
-          .delay((d, i) => i * 100)
-          .attr("r", d => d.radius)
-          .style("opacity", 0.8);
-        
-        // Animate labels
-        svg.selectAll(".drug-label")
-          .transition()
-          .duration(1000)
-          .delay((d, i) => i * 100 + 400)
-          .style("opacity", 1);
-      }
-    }
+    // Function to aggregate data based on filters
+    function aggregateData(data, filterType, age = null, gender = null) {
+      console.log("Aggregating data with filter:", filterType, age, gender);
 
-    // Load real dataset (CSV converted from Excel)
-    d3.csv("data/DOSE_SyS_Dashboard_Download_10-23-2025 - Overall.csv").then(function(data) {
-      console.log("Loaded overdose data:", data.length, "rows");
-
-      // Drug keys and display info
       const drugs = [
         { name: "Fentanyl", key: "fentanyl_rate", color: "#B22222" },
         { name: "Heroin", key: "heroin_rate", color: "#DC143C" },
@@ -249,26 +237,234 @@
         { name: "Benzodiazepines", key: "benzodiazepine_rate", color: "#FFA07A" }
       ];
 
+      let filteredData;
+
+      if (filterType === 'overall') {
+        // Overall: sex = "Total" AND age_range = "Total"
+        filteredData = data.filter(d => d.sex === "Total" && d.age_range === "Total");
+      } else if (filterType === 'age' && age) {
+        // By Age: age_range = selected age AND sex = "Total"
+        filteredData = data.filter(d => d.age_range === age && d.sex === "Total");
+      } else if (filterType === 'gender' && gender) {
+        // By Gender: sex = selected gender AND age_range = "Total"
+        filteredData = data.filter(d => d.sex === gender && d.age_range === "Total");
+      } else {
+        // Default to overall
+        filteredData = data.filter(d => d.sex === "Total" && d.age_range === "Total");
+      }
+
+      console.log("Filtered data rows:", filteredData.length);
+
       // Aggregate (average) the rate for each drug
       const aggregatedData = drugs.map(drug => {
-        const values = data.map(d => +d[drug.key]).filter(v => !isNaN(v));
-        const mean = d3.mean(values);
+        const values = filteredData.map(d => +d[drug.key]).filter(v => !isNaN(v) && v !== 0);
+        const mean = d3.mean(values) || 0;
+        
+        let infoText = `${drug.name} average nonfatal overdose rate`;
+        if (filterType === 'age' && age) {
+          infoText += ` for ages ${age}`;
+        } else if (filterType === 'gender' && gender) {
+          infoText += ` for ${gender === 'M' ? 'males' : 'females'}`;
+        } else {
+          infoText += ` overall`;
+        }
+        
         return {
           name: drug.name,
           deaths: mean,
-          info: `${drug.name} average nonfatal overdose rate across all records.`,
+          info: infoText,
           color: drug.color
         };
       });
 
-      // Create the bubbles (initially hidden)
-      createBubbles(aggregatedData, false);
+      return aggregatedData;
+    }
+
+    // Function to update visualization based on filter
+    function updateVisualization() {
+      if (!fullData) return;
+
+      const aggregatedData = aggregateData(
+        fullData, 
+        currentFilter.type, 
+        currentFilter.age, 
+        currentFilter.gender
+      );
+
+      // Remove old bubbles and labels
+      svg.selectAll(".drug-bubble").remove();
+      svg.selectAll(".drug-label").remove();
+
+      // Create new bubbles with animation
+      createBubbles(aggregatedData, true);
+    }
+
+    // Function to trigger animation
+    function triggerAnimation() {
+      if (simulation && nodes) {
+        console.log("Triggering bubble animation!");
+        
+        simulation.alpha(1).restart();
+        
+        svg.selectAll(".drug-bubble")
+          .transition()
+          .duration(1000)
+          .delay((d, i) => i * 100)
+          .attr("r", d => d.radius)
+          .style("opacity", 0.8);
+        
+        svg.selectAll(".drug-label")
+          .transition()
+          .duration(1000)
+          .delay((d, i) => i * 100 + 400)
+          .style("opacity", 1);
+      }
+    }
+
+    // Create filter controls
+    function createFilterUI() {
+      const filterContainer = d3.select("#drug-bubble-filters");
+      if (!filterContainer.node()) {
+        console.error("Filter container #drug-bubble-filters not found!");
+        return;
+      }
+
+      filterContainer.html(''); // Clear existing content
+
+      // Filter type selection
+      const filterTypeDiv = filterContainer
+        .append("div")
+        .attr("class", "bubble-filter-type")
+        .style("margin-bottom", "20px");
+
+      filterTypeDiv.append("label")
+        .style("font-weight", "600")
+        .style("margin-right", "15px")
+        .text("View by:");
+
+      const filterTypes = [
+        { value: 'overall', label: 'Overall' },
+        { value: 'age', label: 'Age Group' },
+        { value: 'gender', label: 'Gender' }
+      ];
+
+      filterTypes.forEach(type => {
+        const label = filterTypeDiv.append("label")
+          .style("margin-right", "20px")
+          .style("cursor", "pointer");
+
+        label.append("input")
+          .attr("type", "radio")
+          .attr("name", "bubble-filter-type")
+          .attr("value", type.value)
+          .property("checked", type.value === 'overall')
+          .on("change", function() {
+            currentFilter.type = this.value;
+            currentFilter.age = null;
+            currentFilter.gender = null;
+            updateSecondaryFilters();
+            updateVisualization();
+          });
+
+        label.append("span")
+          .style("margin-left", "5px")
+          .text(type.label);
+      });
+
+      // Secondary filter container
+      filterContainer.append("div")
+        .attr("id", "bubble-secondary-filter")
+        .style("margin-top", "15px");
+
+      updateSecondaryFilters();
+    }
+
+    // Update secondary filters based on filter type
+    function updateSecondaryFilters() {
+      const secondaryContainer = d3.select("#bubble-secondary-filter");
+      secondaryContainer.html('');
+
+      if (currentFilter.type === 'age') {
+        // Age group dropdown
+        const ageGroups = ["0 to 14", "15 to 24", "25 to 34", "35 to 44", "45 to 54", "55 to 64", "65+"];
+        
+        secondaryContainer.append("label")
+          .style("font-weight", "600")
+          .style("margin-right", "10px")
+          .text("Select Age Group:");
+
+        const select = secondaryContainer.append("select")
+          .attr("class", "bubble-filter-select")
+          .style("padding", "8px")
+          .style("font-size", "14px")
+          .style("border-radius", "4px")
+          .on("change", function() {
+            currentFilter.age = this.value;
+            updateVisualization();
+          });
+
+        select.append("option")
+          .attr("value", "")
+          .text("-- Select Age --");
+
+        ageGroups.forEach(age => {
+          select.append("option")
+            .attr("value", age)
+            .text(age);
+        });
+
+      } else if (currentFilter.type === 'gender') {
+        // Gender dropdown
+        const genders = [
+          { value: 'M', label: 'Male' },
+          { value: 'F', label: 'Female' }
+        ];
+
+        secondaryContainer.append("label")
+          .style("font-weight", "600")
+          .style("margin-right", "10px")
+          .text("Select Gender:");
+
+        const select = secondaryContainer.append("select")
+          .attr("class", "bubble-filter-select")
+          .style("padding", "8px")
+          .style("font-size", "14px")
+          .style("border-radius", "4px")
+          .on("change", function() {
+            currentFilter.gender = this.value;
+            updateVisualization();
+          });
+
+        select.append("option")
+          .attr("value", "")
+          .text("-- Select Gender --");
+
+        genders.forEach(gender => {
+          select.append("option")
+            .attr("value", gender.value)
+            .text(gender.label);
+        });
+      }
+    }
+
+    // Load real dataset
+    d3.csv("data/DOSE_SyS_Dashboard_Download_10-23-2025 - Overall.csv").then(function(data) {
+      console.log("Loaded overdose data:", data.length, "rows");
+
+      fullData = data;
+
+      // Create filter UI
+      createFilterUI();
+
+      // Create initial bubbles (overall view)
+      const initialData = aggregateData(data, 'overall');
+      createBubbles(initialData, false);
 
       // Set up Intersection Observer for scroll-triggered animation
       const observerOptions = {
-        root: null, // viewport
+        root: null,
         rootMargin: '0px',
-        threshold: 0.3 // trigger when 30% of element is visible
+        threshold: 0.3
       };
 
       const observer = new IntersectionObserver((entries) => {
@@ -276,12 +472,11 @@
           if (entry.isIntersecting && !hasAnimated) {
             console.log("Bubble chart is visible, triggering animation!");
             triggerAnimation();
-            hasAnimated = true; // only animate once
+            hasAnimated = true;
           }
         });
       }, observerOptions);
 
-      // Start observing the container
       observer.observe(container);
 
     }).catch(error => {
