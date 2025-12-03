@@ -585,7 +585,7 @@
   /* Centered, properly positioned year overlay */
   #naloxoneYearOverlay {
     position: absolute;
-    top: -2rem;
+    top: -1rem;
     left: 50%;
     transform: translateX(-50%);
     font-size: 3.8rem;
